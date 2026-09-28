@@ -59,18 +59,7 @@ Per the assessment's own instruction to "make the smallest sensible engineering 
 - The JWT is stored in `localStorage` on the frontend rather than an httpOnly cookie — a known, documented trade-off for this scope (see `ARCHITECTURE.md` → Frontend Architecture).
 - Automated tests cover the highest-risk paths explicitly (auth flows, project ownership enforcement, ZIP path-traversal safety) rather than every listed item in the assessment's testing checklist, in line with "do not create superficial tests merely to increase test count."
 
-## For the Candidate: Before You Submit
 
-Steps 1 and 2 below (originally written before any local run existed) are now complete: the candidate ran the setup end-to-end and manually exercised the full flow — register, project creation, upload, all three review modes, review history, chat, docs generation, and architecture analysis — confirming it worked. What's left:
-
-1. ~~Run the setup steps in `README.md` end-to-end~~ — done; confirmed working locally.
-2. ~~Manually exercise the full feature flow~~ — done; confirmed working locally.
-3. Exercise the Round 4 additions specifically (they postdate the confirmation above) — see the checklist at the end of the Round 4 addendum further down this file.
-4. Read through `reviews/reviews.service.ts`, `files/files.service.ts` (the security-critical path-traversal logic), `ai-providers/ai-providers.service.ts` (the encryption/decryption logic behind the Round 3 bug), and `chat/context-retrieval.ts` closely — these are the parts most likely to come up in an interview about this submission, and are also where the real bugs found during local testing actually lived.
-5. **Before pushing to GitHub**: double-check `git status` doesn't show `backend/.env` or anything under `backend/storage/` other than `.gitkeep` — both are gitignored already, but a `git add -A` from the wrong directory or a manually re-added file can slip past that. `storage/` in particular may contain real code you uploaded for testing that isn't yours to publish.
-6. Update this file if you make further changes by hand, so it stays an accurate record.
-
----
 
 ## Addendum: Post-Submission Review Pass
 
@@ -126,15 +115,6 @@ Prompted by the candidate confirming the app runs correctly locally and asking f
 This pass re-read the assessment specification requirement by requirement against the actual implementation (not against memory of what was built) and closed four real gaps: AI provider enable/disable and edit exposed in the UI (previously data-model-only), the review-history severity filter exposed in the UI (previously backend-only), stronger upload validation (multer `fileFilter` alongside the existing extraction-time validation), and test coverage for the AI review engine's output parsing and the retry/resilience logic added in Round 2 — both previously untested despite being the most AI-integration-specific code in the project, which the assessment's evaluation criteria weight explicitly (AI Integration 15%, Functionality 25%).
 
 **On "100% working" and what that claim can and can't mean from here**: every mandatory and chosen-bonus requirement in the spec now has a corresponding, complete implementation — that comparison was done directly against the spec's own checklist, not inferred. The candidate has confirmed by running it locally that the app installs, runs, and works correctly across its core features (upload, review, and general functionality). That confirmation predates this round's four additions (provider enable/disable, the review-history severity filter, the ZIP upload `fileFilter`, and the four new test files) — those are new code paths that haven't individually been clicked through yet. **What to actually do before pushing**: exercise those four specific additions (a two-minute check, not a full re-test — see below), and run `npm test` in `backend/` once. Everything else has already been verified by the person who matters most for that judgment — you, running your own code.
-
-### Before pushing: verify only what's new since your last confirmed run
-
-1. **AI Providers page**: toggle a provider disabled, confirm it's skipped when it's not the one selected; click "Set default" on another provider.
-2. **Review History**: use the new severity dropdown filter and confirm it actually narrows results.
-3. **Upload a non-ZIP file** (rename any file to `.zip` without it being one, or try a `.rar`) and confirm it's rejected cleanly rather than crashing.
-4. `cd backend && npm test` — confirm the suite passes (this is the first time these specific tests have run anywhere, including in this session).
-
----
 
 ## Addendum: Fifth Round — Actual Test Run Results
 
